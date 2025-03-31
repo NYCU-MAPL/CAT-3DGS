@@ -1,4 +1,7 @@
 # CAT-3DGS: A Context-Adaptive Triplane Approach to Rate-Distortion-Optimized 3DGS Compression
+
+Accpeted to ICLR 2025
+
 Yu-Ting Zhan*, 
 Cheng-Yuan Ho*, 
 Hebi Yang, 
