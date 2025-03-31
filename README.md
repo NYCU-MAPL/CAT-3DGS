@@ -8,7 +8,7 @@ Accpeted to ICLR 2025
 [Yi-Hsin Chen](https://www.linkedin.com/in/yihsinchen/), 
 [Jui Chiu Chiang](https://chiang.ccu.edu.tw/index.php), 
 [Yu-Lun Liu](https://yulunalexliu.github.io/), 
-[Wen-Hsiao Peng]( http://mapl.cs.nycu.edu.tw/)
+[Wen-Hsiao Peng](https://sites.google.com/g2.nctu.edu.tw/wpeng)
 
 [[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`]()] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)]
 
