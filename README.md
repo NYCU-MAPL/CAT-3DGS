@@ -6,7 +6,7 @@ Accpeted to ICLR 2025
 [Cheng-Yuan Ho*](https://www.linkedin.com/in/kelvincyho?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app), 
 [Hebi Yang](https://www.linkedin.com/in/hebiyang?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app ), 
 [Yi-Hsin Chen](https://www.linkedin.com/in/yihsinchen/), 
-[Jui Chiu Chiang](https://chiang.ccu.edu.tw/index.php), 
+[Jui Chiu Chiang](https://chiang.ccu.edu.tw/p/404-1255-68777.php?Lang=zh-tw), 
 [Yu-Lun Liu](https://yulunalexliu.github.io/), 
 [Wen-Hsiao Peng](https://sites.google.com/g2.nctu.edu.tw/wpeng)
 
