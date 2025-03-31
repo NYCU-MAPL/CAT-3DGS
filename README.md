@@ -2,10 +2,10 @@
 
 Accpeted to ICLR 2025
 
-Yu-Ting Zhan*, 
-Cheng-Yuan Ho*, 
-Hebi Yang, 
-Yi-Hsin Chen, 
+[Yu-Ting Zhan*](www.linkedin.com/in/yu-ting-zhan-233784328), 
+[Cheng-Yuan Ho*](https://www.linkedin.com/in/kelvincyho?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app), 
+[Hebi Yang](https://www.linkedin.com/in/hebiyang?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app ), 
+[Yi-Hsin Chen](https://www.linkedin.com/in/yihsinchen/), 
 [Jui Chiu Chiang](https://chiang.ccu.edu.tw/index.php), 
 [Yu-Lun Liu](https://yulunalexliu.github.io/), 
 [Wen-Hsiao Peng]( http://mapl.cs.nycu.edu.tw/)
