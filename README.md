@@ -117,14 +117,11 @@ The code will automatically run the entire process of: **training, encoding, dec
 If you find our work helpful, please consider citing:
 
 ```bibtex
-@misc{zhan2025cat3dgscontextadaptivetriplaneapproach,
-      title={CAT-3DGS: A Context-Adaptive Triplane Approach to Rate-Distortion-Optimized 3DGS Compression}, 
-      author={Yu-Ting Zhan and Cheng-Yuan Ho and Hebi Yang and Yi-Hsin Chen and Jui Chiu Chiang and Yu-Lun Liu and Wen-Hsiao Peng},
-      year={2025},
-      eprint={2503.00357},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2503.00357}, 
+@inproceedings{zhan2025cat3dgs,
+  author    = {Yu-Ting Zhan and Cheng-Yuan Ho and Hebi Yang and Yi-Hsin Chen and Jui Chiu Chiang and Yu-Lun Liu and Wen-Hsiao Peng},
+  title     = {{CAT-3DGS: A context-adaptive triplane approach to rate-distortion-optimized 3DGS compression}},
+  booktitle = {Proceedings of the Thirteenth International Conference on Learning Representations (ICLR)},
+  year      = {2025},
 }
 ```
 
