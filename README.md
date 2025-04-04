@@ -10,7 +10,7 @@ Accpeted to ICLR 2025
 [Yu-Lun Liu](https://yulunalexliu.github.io/), 
 [Wen-Hsiao Peng](https://sites.google.com/g2.nctu.edu.tw/wpeng)
 
-[[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`]()] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)]
+[[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`](https://nycu-mapl.github.io/CAT-3DGS_page/)] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)]
 
 
 ## Abstract
