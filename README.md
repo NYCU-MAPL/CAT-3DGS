@@ -10,11 +10,11 @@ Accpeted to ICLR 2025
 [Yu-Lun Liu](https://yulunalexliu.github.io/), 
 [Wen-Hsiao Peng](https://sites.google.com/g2.nctu.edu.tw/wpeng)
 
-[[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`](https://nycu-mapl.github.io/CAT-3DGS_page/)] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)]
+[[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`](https://nycu-mapl.github.io/CAT-3DGS_page/)] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)] [[`CAT-3DGS Pro Arxiv`](https://arxiv.org/abs/2503.12862)]
 
 ## 🔥 News
 - **[2026/10]** We release an improved version of CAT-3DGS: the hyperprior is upgraded from the learnable triplane to an INR-based hyperprior, following the idea of [CAT-3DGS Pro](https://arxiv.org/abs/2503.12862).
-- **[2025/05]** 🎉 Our follow-up work [**CAT-3DGS Pro**](https://arxiv.org/abs/2503.12862) is accepted to **EUSIPCO 2025**!
+- **[2025/05]** 🎉 Our follow-up work [**CAT-3DGS Pro: A New Benchmark for Efficient 3DGS Compression**](https://arxiv.org/abs/2503.12862) is accepted to **EUSIPCO 2025**!
 
 
 ## Abstract
@@ -64,20 +64,20 @@ The data structure will be organised as follows:
 ```
 data/
 ├── dataset_name
-│   ├── scene1/
-│   │   ├── images
-│   │   │   ├── IMG_0.jpg
-│   │   │   ├── IMG_1.jpg
-│   │   │   ├── ...
-│   │   ├── sparse/
-│   │       └──0/
-│   ├── scene2/
-│   │   ├── images
-│   │   │   ├── IMG_0.jpg
-│   │   │   ├── IMG_1.jpg
-│   │   │   ├── ...
-│   │   ├── sparse/
-│   │       └──0/
+│   ├── scene1/
+│   │   ├── images
+│   │   │   ├── IMG_0.jpg
+│   │   │   ├── IMG_1.jpg
+│   │   │   ├── ...
+│   │   ├── sparse/
+│   │       └──0/
+│   ├── scene2/
+│   │   ├── images
+│   │   │   ├── IMG_0.jpg
+│   │   │   ├── IMG_1.jpg
+│   │   │   ├── ...
+│   │   ├── sparse/
+│   │       └──0/
 ...
 ```
 
@@ -127,6 +127,16 @@ If you find our work helpful, please consider citing:
   booktitle = {Proceedings of the Thirteenth International Conference on Learning Representations (ICLR)},
   year      = {2025},
 }
+
+@misc{zhan2025cat3dgspronewbenchmark,
+  title         = {{CAT-3DGS Pro: A New Benchmark for Efficient 3DGS Compression}},
+  author        = {Yu-Ting Zhan and He-bi Yang and Cheng-Yuan Ho and Jui-Chiu Chiang and Wen-Hsiao Peng},
+  year          = {2025},
+  eprint        = {2503.12862},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2503.12862},
+}
 ```
 
 ## LICENSE
@@ -138,4 +148,3 @@ Please follow the LICENSE of [3D-GS](https://github.com/graphdeco-inria/gaussian
  - We thank all authors from [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting) for presenting such an excellent work.
  - We thank all authors from [Scaffold-GS](https://github.com/city-super/Scaffold-GS) for presenting such an excellent work.
   - We thank all authors from [HAC](https://github.com/YihangChen-ee/HAC) for presenting such an excellent work.
-
