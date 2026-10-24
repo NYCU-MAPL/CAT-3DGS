@@ -14,7 +14,7 @@ Accpeted to ICLR 2025
 
 ## 🔥 News
 - **[2026/10]** We release an improved version of CAT-3DGS: the hyperprior is upgraded from the learnable triplane to an INR-based hyperprior, following the idea of [CAT-3DGS Pro](https://arxiv.org/abs/2503.12862).
-- **[2025]** 🎉 Our follow-up work [**CAT-3DGS Pro**](https://arxiv.org/abs/2503.12862) is accepted to **EUSIPCO 2025**!
+- **[2025/05]** 🎉 Our follow-up work [**CAT-3DGS Pro**](https://arxiv.org/abs/2503.12862) is accepted to **EUSIPCO 2025**!
 
 
 ## Abstract
