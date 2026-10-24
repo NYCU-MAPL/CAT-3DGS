@@ -13,7 +13,7 @@ Accpeted to ICLR 2025
 [[`Arxiv`](https://arxiv.org/abs/2503.00357)] [[`Project Page`](https://nycu-mapl.github.io/CAT-3DGS_page/)] [[`Github`](https://github.com/NYCU-MAPL/CAT-3DGS)]
 
 ## 🔥 News
-- **[2026/10]** We release an improved version of CAT-3DGS: the hyperprior is upgraded from the learnable triplane to an INR-based hyperprior, following the idea of [CAT-3DGS Pro](https://arxiv.org/abs/2503.12862).
+- **[2026/10]** We release an improved version of CAT-3DGS: the hyperprior is upgraded from the learnable triplane to an INR-based hyperprior, following the idea of [CAT-3DGS Pro](https://arxiv.org/abs/2503.12862) (accepted to EUSIPCO 2025).
 
 
 ## Abstract
