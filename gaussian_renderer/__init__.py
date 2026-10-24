@@ -59,7 +59,19 @@ def generate_neural_gaussians(viewpoint_camera, pc : GaussianModel, visible_mask
             pc.update_anchor_bound()
 
         if step > 10000 or step==-1:
-            feat_context, feat_rate = pc.feature_net(pc.get_anchor[visible_mask], itr=step)
+            # PE hyperprior (3Vec): estimate the rate over all anchors, then keep the visible ones for rendering
+            rate_on_all_anchors = not pc.use_triplane
+            if rate_on_all_anchors:
+                anchor = pc.get_anchor
+                feat = pc._anchor_feat
+                grid_offsets = pc._offset
+                grid_scaling = pc.get_scaling
+                mask_anchor = pc.get_mask_anchor(mask)
+                mask_anchor_bool = mask_anchor.to(torch.bool)
+                mask_anchor_rate = (mask_anchor.sum() / mask_anchor.numel()).detach()
+                binary_grid_masks = pc.get_mask(mask)
+
+            feat_context, feat_rate = pc.feature_net(anchor, itr=step)
             scales, means, mean_scaling, scale_scaling, mean_offsets, scale_offsets, Q_feat_adj, Q_scaling_adj, Q_offsets_adj = \
                 torch.split(feat_context, split_size_or_sections=[pc.feat_dim, pc.feat_dim, 6, 6, 3*pc.n_offsets, 3*pc.n_offsets, 1, 1, 1], dim=-1)
             Q_feat = Q_feat * (1.1 + torch.tanh(Q_feat_adj))
@@ -132,6 +144,15 @@ def generate_neural_gaussians(viewpoint_camera, pc : GaussianModel, visible_mask
             bit_per_offsets_param = torch.sum(bit_offsets) / bit_offsets.numel() * mask_anchor_rate
             bit_per_param = (torch.sum(bit_feats) + torch.sum(bit_scaling) + torch.sum(bit_offsets)) / \
                             (bit_feats.numel() + bit_scaling.numel() + bit_offsets.numel()) * mask_anchor_rate
+
+            if rate_on_all_anchors:
+                anchor = anchor[visible_mask]
+                feat = feat[visible_mask]
+                grid_offsets = grid_offsets[visible_mask]
+                grid_scaling = grid_scaling[visible_mask]
+                binary_grid_masks = binary_grid_masks[visible_mask]
+                mask_anchor = mask_anchor[visible_mask]
+                mask_anchor_bool = mask_anchor_bool[visible_mask]
         
             
         

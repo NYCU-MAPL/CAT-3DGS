@@ -63,6 +63,7 @@ class ModelParams(ParamGroup):
         self.data_device = "cuda"
         self.eval = True
         self.lod = 0
+        self.hyperprior = "pe"  # "pe": per-axis positional embedding (3Vec, default); "triplane": original learnable tri-plane + ARM
         self.attribute_config = {
             'net_width': 100,
             'net_depth': 0,

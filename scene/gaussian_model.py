@@ -202,7 +202,9 @@ class GaussianModel(nn.Module):
             ).cuda()
 
         #self.feature_net = attribute_network(attribute_config, 'sof').cuda()
+        self.feature_net = None
         self.attribute_config=attribute_config
+        self.use_triplane = (attribute_config or {}).get('hyperprior', 'pe') == 'triplane'
         self.entropy_gaussian = Entropy_gaussian(Q=1).cuda()
 
     def get_mlp_size(self, digit=32):
@@ -213,9 +215,11 @@ class GaussianModel(nn.Module):
         pmlp_o=self.count_parameters(self.mlp_opacity)
         pmlp_rs=self.count_parameters(self.mlp_cov)
         pmlp_color=self.count_parameters(self.mlp_color)
-        parm=self.count_parameters(self.feature_net.attribute_net.grid.arm)
-        parm2=self.count_parameters(self.feature_net.attribute_net.grid.arm2)
-        parm3=self.count_parameters(self.feature_net.attribute_net.grid.arm3)
+        parm = parm2 = parm3 = 0
+        if self.use_triplane:
+            parm=self.count_parameters(self.feature_net.attribute_net.grid.arm)
+            parm2=self.count_parameters(self.feature_net.attribute_net.grid.arm2)
+            parm3=self.count_parameters(self.feature_net.attribute_net.grid.arm3)
         pmlp_fa=sum(p.numel() for p in self.feature_net.get_mlp_parameters())
         pmlp_chcm = 0
         for i in range(self.num_feat_slices-1):
@@ -260,9 +264,9 @@ class GaussianModel(nn.Module):
         return (
             self.max_radii2D,
             self.optimizer.state_dict(),
-            self.feature_grid_optimizer.state_dict(),
-            self.feature_net_optimizer.state_dict(),
-            self.feature_arm_optimizer.state_dict(),
+            self.feature_grid_optimizer.state_dict() if self.feature_net is not None and self.use_triplane else None,
+            self.feature_net_optimizer.state_dict() if self.feature_net is not None else None,
+            self.feature_arm_optimizer.state_dict() if self.feature_net is not None and self.use_triplane else None,
             self.spatial_lr_scale,
         )
 
@@ -275,12 +279,14 @@ class GaussianModel(nn.Module):
         feature_arm_opt_dict,
         self.spatial_lr_scale) = model_args
         self.training_setup(training_args)
-        self.training_setup_triplane(training_args)
         print(f"optimizer state_dict: {opt_dict}")
         self.optimizer.load_state_dict(opt_dict)
-        self.feature_grid_optimizer.load_state_dict(feature_grid_opt_dict)
-        self.feature_net_optimizer.load_state_dict(feature_net_opt_dict)
-        self.feature_arm_optimizer.load_state_dict(feature_arm_opt_dict)
+        if feature_net_opt_dict is not None:
+            self.training_setup_triplane(training_args)
+            self.feature_net_optimizer.load_state_dict(feature_net_opt_dict)
+            if self.use_triplane:
+                self.feature_grid_optimizer.load_state_dict(feature_grid_opt_dict)
+                self.feature_arm_optimizer.load_state_dict(feature_arm_opt_dict)
         torch.cuda.empty_cache()
 
     @property
@@ -561,10 +567,11 @@ class GaussianModel(nn.Module):
                                                     max_steps=training_args.mlp_deform_lr_max_steps)
 
     def training_setup_triplane(self, training_args):
-        feature_grid_l = [
-            {'params': self.feature_net.get_grid_parameters(), 'lr': training_args.feature_lr, "name": "mlp_color"},
-        ]
-        self.feature_grid_optimizer = torch.optim.Adam(feature_grid_l, lr=0.0, eps=1e-15)
+        if self.use_triplane:
+            feature_grid_l = [
+                {'params': self.feature_net.get_grid_parameters(), 'lr': training_args.feature_lr, "name": "mlp_color"},
+            ]
+            self.feature_grid_optimizer = torch.optim.Adam(feature_grid_l, lr=0.0, eps=1e-15)
         
         feature_net_l = [
             {'params': self.feature_net.get_mlp_parameters(), 'lr': training_args.mlp_color_lr_init, "name": "mlp_color"},
@@ -576,12 +583,13 @@ class GaussianModel(nn.Module):
             feature_net_l.append({'params': self.mlp_chcm_scaling.parameters(), 'lr': training_args.mlp_color_lr_init, "name": "mlp_color"})
         self.feature_net_optimizer = torch.optim.Adam(feature_net_l, lr=0.0, eps=1e-15)
         
-        feature_arm_l = [
-            {'params': self.feature_net.get_arm_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
-            {'params': self.feature_net.get_arm2_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
-            {'params': self.feature_net.get_arm3_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
-        ]
-        self.feature_arm_optimizer = torch.optim.Adam(feature_arm_l, lr=0.0, eps=1e-15)    
+        if self.use_triplane:
+            feature_arm_l = [
+                {'params': self.feature_net.get_arm_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
+                {'params': self.feature_net.get_arm2_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
+                {'params': self.feature_net.get_arm3_parameters(), 'lr': training_args.mlp_deform_lr_init, "name": "mlp_color"},
+            ]
+            self.feature_arm_optimizer = torch.optim.Adam(feature_arm_l, lr=0.0, eps=1e-15)    
         
         
     def count_parameters(self,model):
@@ -619,15 +627,16 @@ class GaussianModel(nn.Module):
                         lr = self.mlp_color_scheduler_args(iteration-10000)
                         param_group['lr'] = lr
 
-            for param_group in self.feature_grid_optimizer.param_groups:
-                if param_group["name"] == "mlp_color" and iteration > 10000:
-                    lr = self.mlp_color_scheduler_args(iteration-10000)
-                    param_group['lr'] = lr        
+            if self.use_triplane:
+                for param_group in self.feature_grid_optimizer.param_groups:
+                    if param_group["name"] == "mlp_color" and iteration > 10000:
+                        lr = self.mlp_color_scheduler_args(iteration-10000)
+                        param_group['lr'] = lr        
 
-            for param_group in self.feature_arm_optimizer.param_groups:
-                if param_group["name"] == "mlp_color" and iteration > 15000:
-                    lr = self.mlp_color_scheduler_args(iteration-15000)
-                    param_group['lr'] = lr
+                for param_group in self.feature_arm_optimizer.param_groups:
+                    if param_group["name"] == "mlp_color" and iteration > 15000:
+                        lr = self.mlp_color_scheduler_args(iteration-15000)
+                        param_group['lr'] = lr
                 
 
     def construct_list_of_attributes(self):
@@ -1126,8 +1135,8 @@ class GaussianModel(nn.Module):
                    f"offsets {round(bit_offsets/bit2MB_scale, 4)}, " \
                    f"masks {round(bit_masks/bit2MB_scale, 4)}, " \
                    f"MLPs {round(self.get_mlp_size()[0]/bit2MB_scale, 4)}, " \
-                   f"Triplane_f {round(ftrirate.item(),4)}," \
-                   f"Total {round((bit_anchor + sum(bit_feat_list) + bit_scaling + bit_offsets + bit_masks+ self.get_mlp_size()[0])/bit2MB_scale+ftrirate.item(), 4)}"
+                   f"Triplane_f {round(float(ftrirate),4)}," \
+                   f"Total {round((bit_anchor + sum(bit_feat_list) + bit_scaling + bit_offsets + bit_masks+ self.get_mlp_size()[0])/bit2MB_scale+float(ftrirate), 4)}"
         return log_info
 
     @torch.no_grad()
@@ -1348,7 +1357,10 @@ class GaussianModel(nn.Module):
         for i in range(self.num_feat_slices):
             show_feat_bits += f'feat{i} {round(bit_feat_list[i]/bit2MB_scale, 4)}, '
 
-        triplane_coder_list, triplane_byte = self.encode_triplane(pre_path_name)
+        if self.use_triplane:
+            triplane_coder_list, triplane_byte = self.encode_triplane(pre_path_name)
+        else:
+            triplane_coder_list, triplane_byte = None, 0
 
         torch.cuda.synchronize(); t2 = time.time()
         print('encoding time:', t2 - t1)
@@ -1363,9 +1375,9 @@ class GaussianModel(nn.Module):
                    f"masks {round(bit_masks/bit2MB_scale, 4)}, " \
                    f"MLPs {round(self.get_mlp_size()[0]/bit2MB_scale, 4)}, " \
                    f"Triplane_f {round(triplane_byte/(1024*1024), 4)}," \
-                   f"Total {round((bit_anchor + total_bit_feat + bit_scaling + bit_offsets + bit_masks + self.get_mlp_size()[0])/bit2MB_scale+ftrirate.item(), 4)}, " \
+                   f"Total {round((bit_anchor + total_bit_feat + bit_scaling + bit_offsets + bit_masks + self.get_mlp_size()[0])/bit2MB_scale+float(ftrirate), 4)}, " \
                    f"EncTime {round(t2 - t1, 4)}"
-        rate_set=[round(bit_anchor/bit2MB_scale, 4), round(total_bit_feat/bit2MB_scale, 4)] + bit2MB_feat_list + [round(bit_scaling/bit2MB_scale, 4),round(bit_offsets/bit2MB_scale, 4),round(bit_masks/bit2MB_scale, 4),round(self.get_mlp_size()[0]/bit2MB_scale, 4),ftrirate.item()]
+        rate_set=[round(bit_anchor/bit2MB_scale, 4), round(total_bit_feat/bit2MB_scale, 4)] + bit2MB_feat_list + [round(bit_scaling/bit2MB_scale, 4),round(bit_offsets/bit2MB_scale, 4),round(bit_masks/bit2MB_scale, 4),round(self.get_mlp_size()[0]/bit2MB_scale, 4),float(ftrirate)]
         return [self._anchor.shape[0], N, MAX_batch_size, anchor_infos_list, min_feat_lists, max_feat_lists, min_scaling_list, max_scaling_list, min_offsets_list, max_offsets_list, prob_masks, triplane_coder_list], log_info , rate_set
 
     @torch.no_grad()
@@ -1382,7 +1394,8 @@ class GaussianModel(nn.Module):
         feat_decoded_list = []
         scaling_decoded_list = []
         offsets_decoded_list = []
-        self.decode_triplane(pre_path_name, triplane_coder_list)
+        if self.use_triplane:
+            self.decode_triplane(pre_path_name, triplane_coder_list)
 
         masks_b_name = os.path.join(pre_path_name, 'masks.b')
 

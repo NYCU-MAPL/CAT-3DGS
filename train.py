@@ -232,7 +232,7 @@ def training(args_param, dataset, opt, pipe, dataset_name, testing_iterations, s
             loss = scaffold_loss
             
         denom = gaussians._anchor.shape[0]*(gaussians.feat_dim+6+3*gaussians.n_offsets)
-        if opt.triplane_init_fit_iter + 5000 < iteration < opt.triplane_init_fit_iter + 6000:
+        if gaussians.use_triplane and opt.triplane_init_fit_iter + 5000 < iteration < opt.triplane_init_fit_iter + 6000:
             loss = feat_rate_per_param
         elif opt.triplane_init_fit_iter <= iteration and bit_per_param is not None:
             loss = loss + args_param.lmbda * (args_param.lmbda_tri * feat_rate_per_param / denom + bit_per_param)
@@ -258,6 +258,9 @@ def training(args_param, dataset, opt, pipe, dataset_name, testing_iterations, s
             training_report(dataset_name, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, scene, render, (pipe, background), wandb, logger, args_param.model_path, mask_weight, args_param)
             if (iteration in saving_iterations):
                 scene.save(iteration)
+            if (iteration in checkpoint_iterations):
+                # save next to the ply, before densification / optimizer step, so the anchor count matches on resume
+                torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
             torch.cuda.synchronize(); t_end_log = time.time()
             t_log = t_end_log - t_start_log
             log_time_sub += t_log
@@ -278,6 +281,13 @@ def training(args_param, dataset, opt, pipe, dataset_name, testing_iterations, s
             if iteration < opt.iterations:
                 if iteration < opt.triplane_init_fit_iter:
                     gaussians.optimizer.step()
+                elif not gaussians.use_triplane:
+                    # PE hyperprior (3Vec): a single stage from triplane_init_fit_iter to the end
+                    if iteration == opt.triplane_init_fit_iter:
+                        set_requires_grad(gaussians.feature_net,True)
+                        set_requires_grad(gaussians.mlp_context_from_f1, True)
+                    gaussians.optimizer.step()
+                    gaussians.feature_net_optimizer.step()
                 elif iteration >= opt.triplane_init_fit_iter and iteration < opt.triplane_init_fit_iter + 5000:
                     if iteration == opt.triplane_init_fit_iter:
                         set_requires_grad(gaussians.feature_net,True)
@@ -319,11 +329,9 @@ def training(args_param, dataset, opt, pipe, dataset_name, testing_iterations, s
                 gaussians.optimizer.zero_grad(set_to_none = True)
                 if iteration >= opt.triplane_init_fit_iter:
                     gaussians.feature_net_optimizer.zero_grad(set_to_none = True)
-                    gaussians.feature_arm_optimizer.zero_grad(set_to_none = True)
-                    gaussians.feature_grid_optimizer.zero_grad(set_to_none = True)
-
-            if (iteration in checkpoint_iterations):
-                torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
+                    if gaussians.use_triplane:
+                        gaussians.feature_arm_optimizer.zero_grad(set_to_none = True)
+                        gaussians.feature_grid_optimizer.zero_grad(set_to_none = True)
 
     torch.cuda.synchronize(); t_end = time.time()
 
@@ -464,7 +472,7 @@ def write_to_file(txt_name, lmbda, size, psnr, ssim, lpips, rate_set):
         folder = os.path.dirname(file_name)
 
         # 如果資料夾不存在，建立資料夾
-        if not os.path.exists(folder):
+        if folder and not os.path.exists(folder):
             os.makedirs(folder)
         
         # Define the column headers and format
@@ -718,6 +726,8 @@ if __name__ == "__main__":
         import mmengine
         config = mmengine.Config.fromfile(args.config)
         args = merge_hparams(args, config)
+    args.attribute_config['hyperprior'] = args.hyperprior
+    args.test_iterations = sorted({i for i in args.test_iterations if i <= args.iterations} | {args.iterations})
 
 
 

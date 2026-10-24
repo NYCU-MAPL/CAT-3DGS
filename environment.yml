@@ -14,11 +14,14 @@ dependencies:
   - torchvision=0.13.1
   - pytorch-scatter
   - tqdm
+  - scikit-learn
+  - ninja
   - pip:
     - einops
     - wandb==0.16.4
     - lpips
     - torchac
+    - constriction
     - comet-ml
     - mmengine
     - submodules/diff-gaussian-rasterization

@@ -1,0 +1,30 @@
+# Versions pinned to the "CAT3DGS" conda env this code was tested with
+# (python 3.7.12, torch 1.12.1 + CUDA 11.6, cuDNN 8.3.2).
+#
+# Install order (see CHANGES_3Vec.md for the full steps):
+#   1. torch / torchvision for CUDA 11.6:
+#        pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+#   2. torch-scatter wheel matching torch 1.12.1 + cu116:
+#        pip install torch-scatter==2.1.0 -f https://data.pyg.org/whl/torch-1.12.1+cu116.html
+#   3. pip install -r requirements.txt
+#   4. the two CUDA extensions (need nvcc 11.x):
+#        cd submodules && unzip diff-gaussian-rasterization.zip && unzip simple-knn.zip && cd ..
+#        pip install submodules/diff-gaussian-rasterization submodules/simple-knn
+
+torch==1.12.1
+torchvision==0.13.1
+torch-scatter==2.1.0
+numpy==1.21.6
+plyfile==0.8.1
+Pillow==9.5.0
+tqdm==4.67.1
+einops==0.6.1
+typing_extensions==4.7.1
+scikit-learn==1.0.2        # scene/gaussian_model.py: LocalOutlierFactor
+torchac==0.9.3             # utils/encodings.py; JIT-builds a C++ backend on first import (needs ninja + g++)
+ninja
+constriction==0.3.5        # scene/bitstream (imported by gaussian_model.py even in PE mode)
+comet-ml==3.52.1           # train.py always creates an Experiment (use --no_comet to disable logging)
+wandb==0.16.4
+mmengine==0.10.7           # only used with --config
+lpips==0.1.4

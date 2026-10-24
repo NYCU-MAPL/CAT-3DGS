@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.utils.cpp_extension import load
 import torch.nn.init as init
 from scene.triplane import TriPlaneField
+from scene.pe_field import PEField
 from scene.plyloader import GaussianPC
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -23,7 +24,13 @@ class Attribute(nn.Module):
         self.W = W
         self.resolution = nn.Parameter(torch.tensor(args['kplanes_config']['resolution']), requires_grad=False)
         self.final_dim=args['final_dim']
-        self.grid = TriPlaneField(args['bounds'], args['kplanes_config'], args['multires'], args['if_contract'],args['comp_iter'])
+        hyperprior = args.get('hyperprior', 'pe')
+        if hyperprior == 'pe':
+            self.grid = PEField(args['bounds'], args['kplanes_config'], args['multires'], args['if_contract'],args['comp_iter'])
+        elif hyperprior == 'triplane':
+            self.grid = TriPlaneField(args['bounds'], args['kplanes_config'], args['multires'], args['if_contract'],args['comp_iter'])
+        else:
+            raise ValueError(f"unknown hyperprior: {hyperprior}")
         self.net = self.create_net()
         self.args = args
 
